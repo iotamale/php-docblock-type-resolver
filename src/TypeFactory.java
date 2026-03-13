@@ -1,6 +1,6 @@
 import java.util.List;
 
-public abstract class TypeFactory {
+public class TypeFactory {
     public static PhpType createType(String typeName) {
         return null;
     }
