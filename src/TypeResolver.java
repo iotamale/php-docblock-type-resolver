@@ -28,17 +28,18 @@ public class TypeResolver {
             final String[] unionTypes = typeString.split("\\|");
             List<PhpType> typesList = new ArrayList<>();
             for (String ut : unionTypes) {
-                if (ut.isEmpty()) {
-                    continue;       /* Edge-case: @var |  */
-                }
                 typesList.add(TypeFactory.createType(ut));
             }
 
             if (typesList.isEmpty()) {
                 return null;
+            } else if (typesList.size() == 1) {
+                return typesList.getFirst(); /* "int|" shouldn't return an union of a signle type */
+            } else {
+                return TypeFactory.createUnionType(typesList);
             }
-            return TypeFactory.createUnionType(typesList);
         }
+
         return TypeFactory.createType(typeString);
     }
 
