@@ -36,12 +36,10 @@ public class TypeResolver {
 
             if (typesList.isEmpty()) {
                 return null;
-            } else {
-                return TypeFactory.createUnionType(typesList);
             }
-        } else {
-            return TypeFactory.createType(typeString);
+            return TypeFactory.createUnionType(typesList);
         }
+        return TypeFactory.createType(typeString);
     }
 
     public PhpType inferTypeFromDoc(PhpVariable variable) {
