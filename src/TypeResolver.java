@@ -20,11 +20,13 @@ public class TypeResolver {
 
             if (typesList.isEmpty()) {
                 return null;
-            } else if (typesList.size() == 1) {
-                return typesList.getFirst();    /* "int|" is simply a single type */
-            } else {
-                return TypeFactory.createUnionType(typesList);
             }
+
+            if (typesList.size() == 1) {
+                return typesList.getFirst();    /* "int|" is simply a single type */
+            }
+
+            return TypeFactory.createUnionType(typesList);
         }
 
         return TypeFactory.createType(typeString);
