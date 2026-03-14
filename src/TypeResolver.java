@@ -6,21 +6,8 @@ public class TypeResolver {
     private static final String TYPE_MIXED = "mixed";
     private static final String TAG_VAR = "var";
 
-    private PhpType parseSingleTag(String value, String targetVarName) {
-        if (value == null) {
-            return null;
-        }
-
-        value = value.trim();
-        if (value.isEmpty()) {
-            return null;
-        }
-
-        final String[] parts = value.split("\\s+");
-        final String typeString = parts[0];
-        final String docVarName = parts.length > 1 ? parts[1] : null;
-
-        if (docVarName != null && !docVarName.equals(targetVarName)) {
+    private PhpType parseTypeString(String typeString) {
+        if (typeString == null) {
             return null;
         }
 
@@ -34,7 +21,7 @@ public class TypeResolver {
             if (typesList.isEmpty()) {
                 return null;
             } else if (typesList.size() == 1) {
-                return typesList.getFirst(); /* "int|" shouldn't return an union of a signle type */
+                return typesList.getFirst();    /* "int|" is simply a single type */
             } else {
                 return TypeFactory.createUnionType(typesList);
             }
@@ -59,11 +46,35 @@ public class TypeResolver {
         }
 
         final String targetVarName = variable.getName();
+        PhpType fallbackGenericType = null;
+
         for (DocTag tag : tags) {
-            final PhpType resolvedType = parseSingleTag(tag.getValue(), targetVarName);
-            if (resolvedType != null) {
-                return resolvedType;
+            String value = tag.getValue();
+            if (value == null) {
+                continue;
             }
+            value = value.trim();
+            if (value.isEmpty()) {
+                continue;
+            }
+
+            final String[] parts = value.split("\\s+");
+            final String typeString = parts[0];
+            final String docVarName = parts.length > 1 ? parts[1] : null;
+
+            if (docVarName != null) {
+                if (docVarName.equals(targetVarName)) {
+                    return parseTypeString(typeString);     /* Extact match */
+                }
+            } else {
+                if (fallbackGenericType == null) {
+                    fallbackGenericType = parseTypeString(typeString);
+                }
+            }
+        }
+
+        if (fallbackGenericType != null) {
+            return fallbackGenericType;    /* No exact match was found, however unnamed type exists */
         }
 
         return TypeFactory.createType(TYPE_MIXED);
