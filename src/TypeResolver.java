@@ -23,7 +23,7 @@ public class TypeResolver {
             }
 
             if (typesList.size() == 1) {
-                return typesList.getFirst();    /* "int|" is simply a single type */
+                return typesList.get(0);    /* "int|" is simply a single type */
             }
 
             return TypeFactory.createUnionType(typesList);
@@ -65,8 +65,10 @@ public class TypeResolver {
             final String docVarName = parts.length > 1 ? parts[1] : null;
 
             if (docVarName != null) {
-                if (docVarName.equals(targetVarName)) {
-                    return parseTypeString(typeString);     /* Extact match */
+                if (docVarName.equals(targetVarName)) {     /* Exact match */
+                    final PhpType result = parseTypeString(typeString);
+                    // parseTypeString can theoretically return null, hence the null check
+                    return result == null ? TypeFactory.createType(TYPE_MIXED) : result;
                 }
             } else {
                 if (fallbackGenericType == null) {
